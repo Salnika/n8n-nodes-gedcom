@@ -21,6 +21,7 @@ export class Gedcom implements INodeType {
 		icon: 'file:gedcom.svg',
 		group: ['transform'],
 		version: 1,
+		subtitle: '={{$parameter["operation"]}}',
 		description: 'Complete GEDCOM toolkit for genealogy data processing',
 		defaults: {
 			name: 'GEDCOM',

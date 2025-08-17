@@ -50,6 +50,50 @@ cp /path/to/n8n-nodes-gedcom/package.json .
 
 ## Usage
 
+## Test your node locally
+You can test your node as you build it by running it in a local n8n instance.
+
+Install n8n using npm:
+
+```bash
+npm install n8n -g
+```
+
+When you are ready to test your node, publish it locally:
+
+```bash
+# In your node directory
+npm run build
+npm link
+```
+
+Install the node into your local n8n instance:
+
+```bash
+# In the nodes directory within your n8n installation
+# node-package-name is the name from the package.json
+npm link n8n-nodes-gedcom
+```
+
+### Check your directory
+
+Make sure you run `npm link n8n-nodes-gedcom` in the nodes directory within your n8n installation. This can be:
+
+*   `~/.n8n/custom/`
+*   `~/.n8n/<your-custom-name>`: if your n8t installation set a different name using `N8N_CUSTOM_EXTENSIONS`.
+
+Start n8n:
+
+```bash
+n8n start
+```
+
+Open n8n in your browser. You should see your nodes when you search for them in the nodes panel.
+
+### Node names
+
+Make sure you search using the node name, not the package name. For example, if your npm package name is `n8n-nodes-gedcom`, and the package contains nodes named `Gedcom`, you should search for `Gedcom`, not `n8n-nodes-gedcom`.
+
 The GEDCOM node provides two main operations:
 
 ### Parse Operation
