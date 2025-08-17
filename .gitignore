@@ -1,8 +1,29 @@
-node_modules
-.DS_Store
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Packaged archives
+*.tgz
+
+# Logs and temporary files
+npm-debug.log*
 .tmp
 tmp
-dist
-npm-debug.log*
+
+# OS-generated files
+.DS_Store
+
+# Editor-specific files
+.vscode/
+.claude/
+
+# Credentials - DO NOT COMMIT
+credentials/
+
+# Lockfiles from other package managers
+# This project uses pnpm, so yarn.lock can be ignored.
 yarn.lock
-.vscode/launch.json

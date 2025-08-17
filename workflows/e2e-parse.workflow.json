@@ -1,0 +1,108 @@
+{
+  "name": "GEDCOM Parse E2E Test",
+  "nodes": [
+    {
+      "parameters": {
+        "filePath": "./test/fixtures/minimal.ged",
+        "options": {}
+      },
+      "id": "b8c4efb1-e5d3-41c8-b9d5-4e5a46a6d4c7",
+      "name": "Read Binary File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "parse",
+        "source": "binary",
+        "binaryProperty": "data"
+      },
+      "id": "f2e1d5c8-a7b6-4e9f-8d2c-1a3b5e7f9c2d",
+      "name": "GEDCOM Parse",
+      "type": "n8n-nodes-gedcom.gedcom",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "individualCount",
+              "value": "={{ $json.meta.individuals }}"
+            },
+            {
+              "name": "familyCount", 
+              "value": "={{ $json.meta.families }}"
+            }
+          ],
+          "string": [
+            {
+              "name": "encoding",
+              "value": "={{ $json.meta.encodingTag }}"
+            },
+            {
+              "name": "firstPersonName",
+              "value": "={{ $json.persons[0].name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9f3e2d1-c8b7-4f6e-9a2b-3c5d7e9f1a4b",
+      "name": "Set Metadata",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Read Binary File": {
+      "main": [
+        [
+          {
+            "node": "GEDCOM Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GEDCOM Parse": {
+      "main": [
+        [
+          {
+            "node": "Set Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1",
+  "meta": {
+    "instanceId": "test"
+  },
+  "id": "e2e-parse-test",
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "test",
+      "name": "E2E Test"
+    }
+  ]
+}

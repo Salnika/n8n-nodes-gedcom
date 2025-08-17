@@ -1,48 +1,271 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-gedcom
 
-# n8n-nodes-starter
+An n8n community node for parsing GEDCOM genealogy files and computing ancestry trees.
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+## Features
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
+- 🔍 **Parse GEDCOM files** - Extract persons and families from standard GEDCOM files
+- 🌳 **Compute ancestry trees** - Generate multi-generation ancestor trees for any individual
+- 📁 **Multiple input sources** - Support binary data and URL downloads
+- 🔤 **Encoding support** - Handle UTF-8, UTF-16 with BOM detection and fallback for legacy encodings
+- ⚡ **Performance optimized** - Efficient parsing for files up to several MB
+- 🧪 **Well tested** - Comprehensive unit tests and E2E workflows
 
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+## Installation
 
-## Prerequisites
+### Via N8N_CUSTOM_EXTENSIONS (Recommended)
 
-You need the following installed on your development machine:
+```bash
+# Set custom extensions directory
+export N8N_CUSTOM_EXTENSIONS="$HOME/.n8n/custom"
+mkdir -p "$N8N_CUSTOM_EXTENSIONS"
 
-* [git](https://git-scm.com/downloads)
-* Node.js and npm. Minimum version Node 20. You can find instructions on how to install both using nvm (Node Version Manager) for Linux, Mac, and WSL [here](https://github.com/nvm-sh/nvm). For Windows users, refer to Microsoft's guide to [Install NodeJS on Windows](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
-* Install n8n with:
-  ```
-  npm install n8n -g
-  ```
-* Recommended: follow n8n's guide to [set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
+# Clone and build the node
+git clone https://github.com/your-username/n8n-nodes-gedcom.git
+cd n8n-nodes-gedcom
+pnpm install
+pnpm run build
 
-## Using this starter
+# Copy to extensions directory
+cp -R dist "$N8N_CUSTOM_EXTENSIONS/n8n-nodes-gedcom"
+cp package.json "$N8N_CUSTOM_EXTENSIONS/n8n-nodes-gedcom/"
 
-These are the basic steps for working with the starter. For detailed guidance on creating and publishing nodes, refer to the [documentation](https://docs.n8n.io/integrations/creating-nodes/).
+# Start n8n
+n8n start
+```
 
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template repository.
-2. Clone your new repo:
-   ```
-   git clone https://github.com/<your organization>/<your-repo-name>.git
-   ```
-3. Run `npm i` to install dependencies.
-4. Open the project in your editor.
-5. Browse the examples in `/nodes` and `/credentials`. Modify the examples, or replace them with your own nodes.
-6. Update the `package.json` to match your details.
-7. Run `npm run lint` to check for errors or `npm run lintfix` to automatically fix errors when possible.
-8. Test your node locally. Refer to [Run your node locally](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally/) for guidance.
-9. Replace this README with documentation for your node. Use the [README_TEMPLATE](README_TEMPLATE.md) to get started.
-10. Update the LICENSE file to use your details.
-11. [Publish](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry) your package to npm.
+### Manual Installation
 
-## More information
+```bash
+# Install in your n8n custom nodes directory
+mkdir -p ~/.n8n/custom/n8n-nodes-gedcom
+cd ~/.n8n/custom/n8n-nodes-gedcom
 
-Refer to our [documentation on creating nodes](https://docs.n8n.io/integrations/creating-nodes/) for detailed information on building your own nodes.
+# Copy built files
+cp -R /path/to/n8n-nodes-gedcom/dist/* .
+cp /path/to/n8n-nodes-gedcom/package.json .
+
+# Restart n8n
+```
+
+## Usage
+
+The GEDCOM node provides two main operations:
+
+### Parse Operation
+
+Extracts all persons and families from a GEDCOM file.
+
+**Parameters:**
+- **Operation**: Parse
+- **Source**: Binary Data or URL
+- **Binary Property**: Property name containing GEDCOM data (default: "data")
+- **URL**: HTTP/HTTPS URL to download GEDCOM file
+
+**Output:**
+```json
+{
+  "meta": {
+    "individuals": 150,
+    "families": 75,
+    "encodingTag": "UTF-8"
+  },
+  "persons": [
+    {
+      "id": "@I1@",
+      "name": "Doe/John/",
+      "birthDate": "01 JAN 1900",
+      "deathDate": "15 DEC 1980",
+      "famc": ["@F1@"],
+      "fams": ["@F2@"]
+    }
+  ],
+  "families": [
+    {
+      "id": "@F1@",
+      "husband": "@I1@",
+      "wife": "@I2@",
+      "children": ["@I3@", "@I4@"]
+    }
+  ]
+}
+```
+
+### Ancestors Operation
+
+Computes the ancestry tree for a specific person up to N generations.
+
+**Parameters:**
+- **Operation**: Ancestors
+- **Source**: Binary Data or URL
+- **Root Person ID**: ID of person to trace (e.g., "@I0074@" or "I0074")
+- **Max Generations**: Number of generations to retrieve (1-15, default: 9)
+
+**Output:**
+```json
+{
+  "root": "@I0074@",
+  "generations": [
+    ["@I0074@"],
+    ["@I100@", "@I101@"],
+    ["@I200@", "@I201@", "@I202@", "@I203@"]
+  ],
+  "nodes": [
+    {
+      "id": "@I0074@",
+      "name": "Smith/John/",
+      "birthDate": "15 MAR 1985",
+      "deathDate": "",
+      "famc": ["@F50@"],
+      "fams": []
+    }
+  ],
+  "edges": [
+    {
+      "parent": "@I100@",
+      "child": "@I0074@", 
+      "relation": "father"
+    },
+    {
+      "parent": "@I101@",
+      "child": "@I0074@",
+      "relation": "mother"
+    }
+  ]
+}
+```
+
+## Encoding Support
+
+The node automatically detects and handles various encodings:
+
+- **UTF-8** (with or without BOM) - Primary support
+- **UTF-16LE/BE** (with BOM detection) - Full support  
+- **Legacy encodings** (ANSEL, CP1252, etc.) - Fallback parser
+
+When the primary parser fails or detects non-UTF-8 encoding tags, the node automatically attempts parsing with the fallback parser (`read-gedcom`) for better compatibility with older GEDCOM files.
+
+## Examples
+
+### Example 1: Parse a GEDCOM file from binary data
+
+```
+Read Binary File → GEDCOM (Parse) → Process Results
+```
+
+### Example 2: Get 5 generations of ancestors
+
+```
+HTTP Request (GEDCOM URL) → GEDCOM (Ancestors, rootId="@I123@", maxGenerations=5) → Visualize Tree
+```
+
+### Example 3: Find all descendants (using Parse + custom logic)
+
+```
+Read Binary File → GEDCOM (Parse) → Code Node (filter/traverse) → Results
+```
+
+## Error Handling
+
+The node provides clear error messages for common issues:
+
+- **File not found**: "GEDCOM file is empty or could not be read"
+- **Invalid URL**: "Failed to download GEDCOM file from URL: 404"
+- **Missing root person**: "Root person with ID '@I999@' not found in GEDCOM data"
+- **Encoding issues**: "Failed to parse GEDCOM file with both parsers..."
+- **Missing parameters**: "Root Person ID is required for ancestors operation"
+
+## Limitations
+
+### Current Version (v0.1.0)
+- Names with multiple `NAME` tags: Only the first name is captured
+- Dates are preserved as raw text (no normalization for "ABT 1900", etc.)
+- No duplicate detection or individual merging
+- No descendants computation (ancestors only)
+- No GEDCOM export functionality
+- No visual tree rendering
+
+### File Size Limits
+- Recommended: Files up to 5-10 MB
+- Memory usage: Entire file loaded into memory
+- Streaming not supported in this version
+
+## Testing
+
+The project includes comprehensive tests:
+
+```bash
+# Run unit tests
+pnpm run test
+
+# Run type checking
+pnpm run typecheck
+
+# Run linting
+pnpm run lint
+
+# Build project
+pnpm run build
+```
+
+### Test Fixtures
+- `test/fixtures/minimal.ged` - Basic 3-person family
+- `test/fixtures/sample-utf8.ged` - Multi-generation UTF-8 file
+
+### E2E Workflows
+- `workflows/e2e-parse.workflow.json` - Test parsing operation
+- `workflows/e2e-ancestors.workflow.json` - Test ancestry computation
+
+## Development
+
+### Project Structure
+```
+src/
+  nodes/
+    Gedcom/
+      Gedcom.node.ts          # Main node implementation
+test/
+  unit/
+    gedcom.parse.spec.ts      # Parse operation tests
+    gedcom.ancestors.spec.ts  # Ancestors operation tests
+  fixtures/
+    *.ged                     # Test GEDCOM files
+workflows/
+  e2e-*.workflow.json         # n8n workflow tests
+```
+
+### Building from Source
+
+```bash
+git clone https://github.com/your-username/n8n-nodes-gedcom.git
+cd n8n-nodes-gedcom
+pnpm install
+pnpm run build
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass: `pnpm run test && pnpm run typecheck && pnpm run lint`
+5. Submit a pull request
 
 ## License
 
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+MIT License - see [LICENSE.md](LICENSE.md) for details.
+
+## Dependencies
+
+- **parse-gedcom** (^2.0.1) - Primary GEDCOM parser
+- **read-gedcom** (^0.3.2) - Fallback parser for legacy encodings
+
+## Support
+
+- 📖 **Documentation**: This README
+- 🐛 **Issues**: [GitHub Issues](https://github.com/your-username/n8n-nodes-gedcom/issues)
+- 💬 **Community**: [n8n Community Forum](https://community.n8n.io/)
+
+---
+
+*Generated with ❤️ for the n8n community*

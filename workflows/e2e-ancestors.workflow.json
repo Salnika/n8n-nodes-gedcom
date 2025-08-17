@@ -1,0 +1,142 @@
+{
+  "name": "GEDCOM Ancestors E2E Test", 
+  "nodes": [
+    {
+      "parameters": {
+        "filePath": "./test/fixtures/sample-utf8.ged",
+        "options": {}
+      },
+      "id": "c1a2b3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Read Binary File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "ancestors",
+        "source": "binary", 
+        "binaryProperty": "data",
+        "rootId": "@I5@",
+        "maxGenerations": 3
+      },
+      "id": "d4c3b2a1-f6e5-0987-dcba-fe0987654321",
+      "name": "GEDCOM Ancestors",
+      "type": "n8n-nodes-gedcom.gedcom",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "rootPersonId",
+              "value": "={{ $json.root }}"
+            },
+            {
+              "name": "generationCount",
+              "value": "={{ $json.generations.length }}"
+            },
+            {
+              "name": "totalNodes",
+              "value": "={{ $json.nodes.length }}"
+            },
+            {
+              "name": "totalEdges", 
+              "value": "={{ $json.edges.length }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5f6g7h8-i9j0-k1l2-m3n4-o5p6q7r8s9t0",
+      "name": "Set Ancestry Stats",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "generation0",
+              "value": "={{ $json.generations[0].join(',') }}"
+            },
+            {
+              "name": "generation1", 
+              "value": "={{ $json.generations[1] ? $json.generations[1].join(',') : 'none' }}"
+            },
+            {
+              "name": "generation2",
+              "value": "={{ $json.generations[2] ? $json.generations[2].join(',') : 'none' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6g7h8i9-j0k1-l2m3-n4o5-p6q7r8s9t0u1",
+      "name": "Set Generation Details",
+      "type": "n8n-nodes-base.set", 
+      "typeVersion": 1,
+      "position": [
+        680,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Read Binary File": {
+      "main": [
+        [
+          {
+            "node": "GEDCOM Ancestors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GEDCOM Ancestors": {
+      "main": [
+        [
+          {
+            "node": "Set Ancestry Stats", 
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Generation Details",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1",
+  "meta": {
+    "instanceId": "test"
+  },
+  "id": "e2e-ancestors-test",
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z", 
+      "id": "test",
+      "name": "E2E Test"
+    }
+  ]
+}
